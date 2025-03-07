@@ -1,0 +1,7 @@
+streamlit
+faiss-cpu
+numpy
+pandas
+openai
+python-dotenv
+gdown
