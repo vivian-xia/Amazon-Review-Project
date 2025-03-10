@@ -1,16 +1,17 @@
-import openai
+from openai import OpenAI
 import os
 import json
 import pandas as pd
-from dotenv import load_dotenv
+#from dotenv import load_dotenv
+#import streamlit as st
 
-load_dotenv()
-api_key = os.getenv("OpenAI_API_Key")
+#load_dotenv()
+#api_key = os.getenv("OpenAI_API_Key")
 
 class SentimentAgent:
-    def __init__(self):
+    def __init__(self, api_key):
         """Initialize OpenAI client."""
-        self.client = openai.OpenAI(api_key=api_key)
+        self.client = OpenAI(api_key=api_key)
 
     def analyze_reviews(self, reviews):
         """Analyze sentiment of each review and return updated DataFrame with sentiment labels."""

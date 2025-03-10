@@ -1,14 +1,15 @@
-import openai
+from openai import OpenAI
 import os
-from dotenv import load_dotenv
+#from dotenv import load_dotenv
+#import streamlit as st
 
-load_dotenv()
-api_key = os.getenv("OpenAI_API_Key")
+#load_dotenv()
+#api_key = os.getenv("OpenAI_API_Key")
 
 class SummaryAgent:
-    def __init__(self):
+    def __init__(self, api_key):
         """Initialize OpenAI client."""
-        self.client = openai.OpenAI(api_key=api_key)
+        self.client = OpenAI(api_key=api_key)
 
     def generate_summary(self, user_query, reviews_with_sentiment):
         """Generate a final AI-powered answer based on reviews and their sentiment."""

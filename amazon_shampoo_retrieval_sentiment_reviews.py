@@ -1,19 +1,24 @@
 import streamlit as st
+from openai import OpenAI
 from retriever import ReviewRetriever
 from sentiment import SentimentAgent
 from summary import SummaryAgent
 
+# Ensure the API key is loaded from Streamlit secrets
+api_key = st.secrets.get("OPENAI_API_KEY")
+client = OpenAI(api_key=api_key)
+
 # Initialize agents
-retriever = ReviewRetriever()
-sentiment_agent = SentimentAgent()
-summary_agent = SummaryAgent()
+retriever = ReviewRetriever(api_key=api_key)
+sentiment_agent = SentimentAgent(api_key=api_key)
+summary_agent = SummaryAgent(api_key=api_key)
 
 st.title("Shampoo Review-Based Q&A AI 🔍")
 st.write("Ask about a specific shampoo or find the best shampoo for a concern like volume, dandruff, or dry hair.")
 
 # Let users choose between specific or general questions
 query_type = st.radio("What would you like to do?", 
-                      ["Ask about a specific shampoo", "Find the best shampoo for a concern"])
+                    ["Ask about a specific shampoo", "Find the best shampoo for a concern"])
 
 if query_type == "Ask about a specific shampoo":
     # Get list of shampoos and create dropdown menu
