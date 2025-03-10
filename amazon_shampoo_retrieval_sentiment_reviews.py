@@ -4,9 +4,11 @@ from retriever import ReviewRetriever
 from sentiment import SentimentAgent
 from summary import SummaryAgent
 
-# Ensure the API key is loaded from Streamlit secrets
+# Load API key from secrets
 api_key = st.secrets.get("OPENAI_API_KEY")
-client = OpenAI(api_key=api_key)
+if not api_key:
+    st.error("❌ OpenAI API key not found in secrets.")
+    st.stop()
 
 # Initialize agents
 retriever = ReviewRetriever(api_key=api_key)
