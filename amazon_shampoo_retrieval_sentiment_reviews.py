@@ -5,7 +5,7 @@ from sentiment import SentimentAgent
 from summary import SummaryAgent
 
 # Load API key from secrets
-api_key = st.secrets.get("OPENAI_API_KEY")
+api_key = st.secrets.get("OpenAI_API_Key")
 if not api_key:
     st.error("❌ OpenAI API key not found in secrets.")
     st.stop()

@@ -31,7 +31,7 @@ class ReviewRetriever:
         self.client = OpenAI(api_key=api_key)
 
 class ReviewRetriever:
-    def __init__(self):
+    def __init__(self, api_key):
         """Initialize FAISS index and review dataset from Google Drive."""
         self.index_path = "faiss_index.idx"
         self.data_path = "reviews_data.pkl"
