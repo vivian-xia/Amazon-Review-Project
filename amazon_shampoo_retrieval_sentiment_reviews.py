@@ -3,6 +3,7 @@ from openai import OpenAI
 from retriever import ReviewRetriever
 from sentiment import SentimentAgent
 from summary import SummaryAgent
+from evaluation import evaluate_answer
 
 # Load API key from secrets
 api_key = st.secrets.get("OpenAI_API_Key")
@@ -53,6 +54,14 @@ if query_type == "Ask about a specific shampoo":
                     st.write(f"**Sentiment:** {row['sentiment']}")
                     st.write(f"**Review:** {row['combined_context']}")
 
+            # ✅ Run evaluation
+            evaluate_answer(
+                user_query=user_query,
+                retrieved_reviews=top_reviews_with_sentiment,
+                generated_answer=generated_answer,
+                export_csv_path="evaluation_logs.csv"
+            )
+
 else:
     # General concern-based query
     user_query = st.text_input("Example: What shampoo is best for (e.g., volume, dandruff, dry hair)?")
@@ -79,3 +88,19 @@ else:
                 with st.expander(f"Review {index + 1} - {row['product_title']} (Score: {row['similarity_score']:.2f})"):
                     st.write(f"**Sentiment:** {row['sentiment']}")
                     st.write(f"**Review:** {row['combined_context']}")
+
+            # ✅ Run evaluation
+            evaluate_answer(
+                user_query=user_query,
+                retrieved_reviews=top_reviews_with_sentiment,
+                generated_answer=generated_answer,
+                export_csv_path="evaluation_logs.csv"
+            )
+
+with open("evaluation_logs.csv", "rb") as f:
+    st.download_button(
+        label="Download Evaluation Log CSV",
+        data=f,
+        file_name="evaluation_logs.csv",
+        mime="text/csv"
+    )
