@@ -8,8 +8,10 @@ import nltk
 nltk.download('wordnet')
 nltk.download('omw-1.4')
 
-# Set your OpenAI API key if not using Streamlit secrets
-openai.api_key = os.getenv("OPENAI_API_KEY")
+#openai.api_key = os.getenv("OPENAI_API_KEY")
+
+import os
+os.environ["STREAMLIT_WATCH_DIR"] = "false"
 
 # -------- TEXT METRICS -------- #
 def compute_rouge(reference, candidate):
