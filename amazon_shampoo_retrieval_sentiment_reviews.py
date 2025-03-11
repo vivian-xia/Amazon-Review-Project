@@ -6,6 +6,7 @@ from summary import SummaryAgent
 from evaluation import evaluate_answer
 import io
 import os
+os.environ["STREAMLIT_WATCH_DIR"] = "false"  # Fix for PyTorch-related errors
 
 # Load API key from secrets
 api_key = st.secrets.get("OpenAI_API_Key")
@@ -91,7 +92,7 @@ else:
                     st.write(f"**Sentiment:** {row['sentiment']}")
                     st.write(f"**Review:** {row['combined_context']}")
 
-            # Run evaluation
+            # ✅ Run evaluation
             evaluate_answer(
                 user_query=user_query,
                 retrieved_reviews=top_reviews_with_sentiment,
@@ -99,7 +100,7 @@ else:
                 export_csv_path="evaluation_logs.csv"
             )
 
-# Add download button for evaluation logs
+# ✅ Add download button for evaluation logs
 if os.path.exists("evaluation_logs.csv"):
     with open("evaluation_logs.csv", "rb") as f:
         st.download_button(
