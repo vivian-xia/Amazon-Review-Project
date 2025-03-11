@@ -5,3 +5,6 @@ pandas
 openai
 python-dotenv
 gdown
+rouge-score 
+bert-score 
+nltk
