@@ -4,6 +4,8 @@ from retriever import ReviewRetriever
 from sentiment import SentimentAgent
 from summary import SummaryAgent
 from evaluation import evaluate_answer
+import io
+import os
 
 # Load API key from secrets
 api_key = st.secrets.get("OpenAI_API_Key")
@@ -97,10 +99,12 @@ else:
                 export_csv_path="evaluation_logs.csv"
             )
 
-with open("evaluation_logs.csv", "rb") as f:
-    st.download_button(
-        label="Download Evaluation Log CSV",
-        data=f,
-        file_name="evaluation_logs.csv",
-        mime="text/csv"
-    )
+# ✅ Add download button for evaluation logs
+if os.path.exists("evaluation_logs.csv"):
+    with open("evaluation_logs.csv", "rb") as f:
+        st.download_button(
+            label="📥 Download Evaluation Log CSV",
+            data=f,
+            file_name="evaluation_logs.csv",
+            mime="text/csv"
+        )
