@@ -92,14 +92,10 @@ else:
                 export_csv_path="evaluation_logs.csv"
             )
 
-# ✅ Add download button for evaluation logs
-if                            .path.exists("evaluation_logs.csv"):
-    df = pd.read_csv("evaluation_logs.csv")
-    csv_buffer = io.StringIO()
-    df.to_csv(csv_buffer, index=False)
-    st.download_button(
-        label="📥 Download Evaluation Log CSV",
-        data=csv_buffer.getvalue(),
-        file_name="evaluation_logs.csv",
-        mime="text/csv"
-    )
+    
+    if os.path.exists(export_csv_path):
+        df.to_csv(export_csv_path, mode='a', index=False, header=False)
+    else:
+        df.to_csv(export_csv_path, index=False)
+
+    return result
