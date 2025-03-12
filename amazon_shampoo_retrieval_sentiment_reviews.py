@@ -6,10 +6,7 @@ from summary import SummaryAgent
 from evaluation import evaluate_answer
 import io
 import pandas as pd
-
 import os
-os.environ["PYTORCH_JIT"] = st.secrets["PYTORCH_JIT"]
-os.environ["STREAMLIT_WATCH_USE_POLLING"] = st.secrets["STREAMLIT_WATCH_USE_POLLING"]
 
 # Load API key from secrets
 api_key = st.secrets.get("OpenAI_API_Key")
@@ -96,7 +93,7 @@ else:
             )
 
 # ✅ Add download button for evaluation logs
-if os.path.exists("evaluation_logs.csv"):
+if                            .path.exists("evaluation_logs.csv"):
     df = pd.read_csv("evaluation_logs.csv")
     csv_buffer = io.StringIO()
     df.to_csv(csv_buffer, index=False)
