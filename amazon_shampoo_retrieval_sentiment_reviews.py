@@ -95,15 +95,3 @@ else:
                 generated_answer=generated_answer,
                 export_csv_path="evaluation_logs.csv"
             )
-
-# ✅ Add download button for evaluation logs
-if os.path.exists("evaluation_logs.csv"):
-    df = pd.read_csv("evaluation_logs.csv")
-    csv_buffer = io.StringIO()
-    df.to_csv(csv_buffer, index=False)
-    st.download_button(
-        label="📥 Download Evaluation Log CSV",
-        data=csv_buffer.getvalue(),
-        file_name="evaluation_logs.csv",
-        mime="text/csv"
-    )
