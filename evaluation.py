@@ -40,12 +40,12 @@ def call_llm(prompt, model="gpt-4o", temperature=0):
 
 def llm_metric_prompt(metric, question, reviews, answer):
     prompts = {
-        "accuracy": f"Is the information factually correct and reliable taken from the reviews with no fabrication? Rate from 1 (unreliable) to 5 (very reliable).\n\nAnswer: {answer}\n\nScore:",
-        "relevance": f"Does the answer directly address the user's question using information from the reviews? Rate from 1 (irrelevant) to 5 (highly relevant).\n\nQuestion: {question}\n\nReviews: {reviews}\n\nAnswer: {answer}\n\nScore:",
-        "coherence": f"Is the answer logically structured and coherent? Rate from 1 (poor) to 5 (excellent).\n\nAnswer: {answer}\n\nScore:",
-        "clarity": f"Is the answer clearly written and easy to understand? Rate from 1 (unclear) to 5 (very clear).\n\nAnswer: {answer}\n\nScore:",
-        "consistency": f"Does the answer avoid internal contradictions? Rate from 1 (inconsistent) to 5 (very consistent).\n\nAnswer: {answer}\n\nScore:",
-        "sentiment_alignment": f"Does the answer reflect the overall sentiment from the reviews? Rate from 1 (not aligned) to 5 (aligned).\n\nReviews: {reviews}\n\nAnswer: {answer}\n\nScore:"
+        "accuracy": f"On a scale of 1 to 5, where 1 is unreliable and 5 is very reliable, rate the factual accuracy of the following answer based only on the information from the reviews. Respond ONLY with a single number (1-5).\n\nAnswer: {answer}\n\nReviews: {reviews}\n\nScore:",
+        "relevance": f"On a scale of 1 to 5, where 1 is irrelevant and 5 is highly relevant, rate how well the answer addresses the user's question using only the information from the reviews. Respond ONLY with a single number (1-5).\n\nQuestion: {question}\n\nAnswer: {answer}\n\nReviews: {reviews}\n\nScore:",
+        "coherence": f"On a scale of 1 to 5, where 1 is poorly structured and 5 is very well structured, rate the coherence of the answer. Respond ONLY with a single number (1-5).\n\nAnswer: {answer}\n\nScore:",
+        "clarity": f"On a scale of 1 to 5, where 1 is unclear and 5 is very clear, rate the clarity of the answer. Respond ONLY with a single number (1-5).\n\nAnswer: {answer}\n\nScore:",
+        "consistency": f"On a scale of 1 to 5, where 1 is inconsistent and 5 is very consistent, rate whether the answer avoids contradictions. Respond ONLY with a single number (1-5).\n\nAnswer: {answer}\n\nScore:",
+        "sentiment_alignment": f"On a scale of 1 to 5, where 1 is not aligned and 5 is well aligned, rate whether the answer reflects the overall sentiment from the reviews. Respond ONLY with a single number (1-5).\n\nAnswer: {answer}\n\nReviews: {reviews}\n\nScore:"
     }
     return call_llm(prompts[metric])
 
