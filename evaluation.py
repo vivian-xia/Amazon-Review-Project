@@ -37,7 +37,7 @@ def call_llm(prompt, model="gpt-4", temperature=0):
 
 def llm_metric_prompt(metric, question, reviews, answer):
     prompts = {
-        "faithfulness": f"Are the claims in this answer grounded in the reviews? Rate from 1 (not faithful) to 5 (fully grounded).\n\nQuestion: {question}\n\nReviews: {reviews}\n\nAnswer: {answer}\n\nScore:",
+        "accuracy": f"Is the information factually correct and reliable taken from the reviews with no fabrication? Rate from 1 (unreliable) to 5 (very reliable).\n\nAnswer: {answer}\n\nScore:",
         "relevance": f"Does the answer directly address the user's question using information from the reviews? Rate from 1 (irrelevant) to 5 (highly relevant).\n\nQuestion: {question}\n\nReviews: {reviews}\n\nAnswer: {answer}\n\nScore:",
         "coherence": f"Is the answer logically structured and coherent? Rate from 1 (poor) to 5 (excellent).\n\nAnswer: {answer}\n\nScore:",
         "clarity": f"Is the answer clearly written and easy to understand? Rate from 1 (unclear) to 5 (very clear).\n\nAnswer: {answer}\n\nScore:",
@@ -56,7 +56,7 @@ def evaluate_answer_cosine(user_query, retrieved_reviews, generated_answer, expo
 
     llm_metrics = {
         metric: llm_metric_prompt(metric, user_query, combined_reviews, generated_answer)
-        for metric in ["faithfulness", "relevance", "coherence", "clarity", "consistency", "sentiment_alignment"]
+        for metric in ["accuracy", "relevance", "coherence", "clarity", "consistency", "sentiment_alignment"]
     }
 
     result = {
