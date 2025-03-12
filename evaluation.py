@@ -5,7 +5,7 @@ from nltk.translate.meteor_score import meteor_score
 from rouge_score import rouge_scorer
 from sklearn.metrics.pairwise import cosine_similarity
 from sentence_transformers import SentenceTransformer
-import openai
+from openai import OpenAI
 
 nltk.download("wordnet")
 nltk.download("omw-1.4")
