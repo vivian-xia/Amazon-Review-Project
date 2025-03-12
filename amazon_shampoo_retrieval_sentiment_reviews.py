@@ -1,7 +1,3 @@
-import os
-os.environ["PYTORCH_JIT"] = st.secrets["PYTORCH_JIT"]
-os.environ["STREAMLIT_WATCH_USE_POLLING"] = st.secrets["STREAMLIT_WATCH_USE_POLLING"]
-
 import streamlit as st
 from openai import OpenAI
 from retriever import ReviewRetriever
@@ -10,6 +6,10 @@ from summary import SummaryAgent
 from evaluation import evaluate_answer
 import io
 import pandas as pd
+
+import os
+os.environ["PYTORCH_JIT"] = st.secrets["PYTORCH_JIT"]
+os.environ["STREAMLIT_WATCH_USE_POLLING"] = st.secrets["STREAMLIT_WATCH_USE_POLLING"]
 
 # Load API key from secrets
 api_key = st.secrets.get("OpenAI_API_Key")
