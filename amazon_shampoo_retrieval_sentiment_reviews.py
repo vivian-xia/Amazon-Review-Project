@@ -1,79 +1,103 @@
 import os
+import streamlit as st
+import io
 import pandas as pd
-import nltk
-from nltk.translate.meteor_score import meteor_score
-from rouge_score import rouge_scorer
-from sklearn.metrics.pairwise import cosine_similarity
-from sentence_transformers import SentenceTransformer
-import openai
+from openai import OpenAI
+from retriever import ReviewRetriever
+from sentiment import SentimentAgent
+from summary import SummaryAgent
+from evaluation import evaluate_answer_cosine
 
-nltk.download("wordnet")
-nltk.download("omw-1.4")
+# Load API key from secrets
+api_key = st.secrets.get("OpenAI_API_Key")
+if not api_key:
+    st.error("❌ OpenAI API key not found in secrets.")
+    st.stop()
 
-embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
+# Initialize agents
+retriever = ReviewRetriever(api_key=api_key)
+sentiment_agent = SentimentAgent(api_key=api_key)
+summary_agent = SummaryAgent(api_key=api_key)
 
-# -------- TEXT METRICS -------- #
-def compute_rouge(reference, candidate):
-    scorer = rouge_scorer.RougeScorer(['rouge1', 'rouge2', 'rougeL'], use_stemmer=True)
-    return scorer.score(reference, candidate)
+st.title("Shampoo Review-Based Q&A AI 🔍")
+st.write("Ask about a specific shampoo or find the best shampoo for a concern like volume, dandruff, or dry hair.")
 
-def compute_cosine_similarity(reference, candidate):
-    ref_emb = embedding_model.encode([reference])
-    cand_emb = embedding_model.encode([candidate])
-    score = cosine_similarity(ref_emb, cand_emb)[0][0]
-    return float(score)
+query_type = st.radio("What would you like to do?", ["Ask about a specific shampoo", "Find the best shampoo for a concern"])
 
-def compute_meteor(reference, candidate):
-    return meteor_score([reference], candidate)
+if query_type == "Ask about a specific shampoo":
+    shampoo_list = retriever.get_product_list()
+    selected_shampoo = st.selectbox("Select a shampoo product:", shampoo_list)
+    user_query = st.text_input(f"Ask a question about '{selected_shampoo}':")
 
-# -------- LLM EVALUATOR -------- #
-def call_llm(prompt, model="gpt-4o", temperature=0):
-    response = openai.ChatCompletion.create(
-        model=model,
-        messages=[{"role": "user", "content": prompt}],
-        temperature=temperature
+    if user_query:
+        with st.spinner("Retrieving reviews..."):
+            top_reviews = retriever.get_top_k_reviews(user_query, selected_product=selected_shampoo)
+
+        if top_reviews.empty:
+            st.warning(f"No relevant reviews found for {selected_shampoo}.")
+        else:
+            with st.spinner("Analyzing review sentiment..."):
+                top_reviews_with_sentiment = sentiment_agent.analyze_reviews(top_reviews)
+
+            with st.spinner("Generating AI-powered response..."):
+                generated_answer = summary_agent.generate_summary(user_query, top_reviews_with_sentiment)
+
+            st.subheader("AI-Generated Answer")
+            st.write(generated_answer)
+
+            st.subheader(f"Top Relevant Reviews for {selected_shampoo} with Sentiment")
+            for index, row in top_reviews_with_sentiment.iterrows():
+                with st.expander(f"Review {index + 1} - {row['product_title']} (Score: {row['similarity_score']:.2f})"):
+                    st.write(f"**Sentiment:** {row['sentiment']}")
+                    st.write(f"**Review:** {row['combined_context']}")
+
+            evaluate_answer_cosine(
+                user_query=user_query,
+                retrieved_reviews=top_reviews_with_sentiment,
+                generated_answer=generated_answer,
+                export_csv_path="evaluation_logs.csv"
+            )
+
+else:
+    user_query = st.text_input("Example: What shampoo is best for (e.g., volume, dandruff, dry hair)?")
+
+    if user_query:
+        with st.spinner("Retrieving reviews..."):
+            top_reviews = retriever.get_top_k_reviews(user_query)
+
+        if top_reviews.empty:
+            st.warning("No relevant reviews found.")
+        else:
+            with st.spinner("Analyzing review sentiment..."):
+                top_reviews_with_sentiment = sentiment_agent.analyze_reviews(top_reviews)
+
+            with st.spinner("Generating AI-powered response..."):
+                generated_answer = summary_agent.generate_summary(user_query, top_reviews_with_sentiment)
+
+            st.subheader("AI-Generated Answer")
+            st.write(generated_answer)
+
+            st.subheader("Top Relevant Reviews with Sentiment")
+            for index, row in top_reviews_with_sentiment.iterrows():
+                with st.expander(f"Review {index + 1} - {row['product_title']} (Score: {row['similarity_score']:.2f})"):
+                    st.write(f"**Sentiment:** {row['sentiment']}")
+                    st.write(f"**Review:** {row['combined_context']}")
+
+            evaluate_answer_cosine(
+                user_query=user_query,
+                retrieved_reviews=top_reviews_with_sentiment,
+                generated_answer=generated_answer,
+                export_csv_path="evaluation_logs.csv"
+            )
+
+# CSV download button
+if os.path.exists("evaluation_logs.csv"):
+    df = pd.read_csv("evaluation_logs.csv")
+    csv_buffer = io.StringIO()
+    df.to_csv(csv_buffer, index=False)
+    st.download_button(
+        label="📥 Download Evaluation Log CSV",
+        data=csv_buffer.getvalue(),
+        file_name="evaluation_logs.csv",
+        mime="text/csv"
     )
-    return response['choices'][0]['message']['content']
-
-def llm_metric_prompt(metric, question, reviews, answer):
-    prompts = {
-        "faithfulness": f"Are the claims in this answer grounded in the reviews? Rate from 1 (not faithful) to 5 (fully grounded).\n\nQuestion: {question}\n\nReviews: {reviews}\n\nAnswer: {answer}\n\nScore:",
-        "relevance": f"Does the answer directly address the user's question using information from the reviews? Rate from 1 (irrelevant) to 5 (highly relevant).\n\nQuestion: {question}\n\nReviews: {reviews}\n\nAnswer: {answer}\n\nScore:",
-        "coherence": f"Is the answer logically structured and coherent? Rate from 1 (poor) to 5 (excellent).\n\nAnswer: {answer}\n\nScore:",
-        "clarity": f"Is the answer clearly written and easy to understand? Rate from 1 (unclear) to 5 (very clear).\n\nAnswer: {answer}\n\nScore:",
-        "consistency": f"Does the answer avoid internal contradictions? Rate from 1 (inconsistent) to 5 (very consistent).\n\nAnswer: {answer}\n\nScore:",
-        "sentiment_alignment": f"Does the answer reflect the overall sentiment from the reviews? Rate from 1 (not aligned) to 5 (aligned).\n\nReviews: {reviews}\n\nAnswer: {answer}\n\nScore:"
-    }
-    return call_llm(prompts[metric])
-
-# -------- MAIN EVALUATION FUNCTION -------- #
-def evaluate_answer_cosine(user_query, retrieved_reviews, generated_answer, export_csv_path="evaluation_logs.csv"):
-    combined_reviews = " ".join(retrieved_reviews['combined_context'].tolist())
-
-    rouge = compute_rouge(combined_reviews, generated_answer)
-    cosine_sim = compute_cosine_similarity(combined_reviews, generated_answer)
-    meteor = compute_meteor(combined_reviews, generated_answer)
-
-    llm_metrics = {
-        metric: llm_metric_prompt(metric, user_query, combined_reviews, generated_answer)
-        for metric in ["faithfulness", "relevance", "coherence", "clarity", "consistency", "sentiment_alignment"]
-    }
-
-    result = {
-        "question": user_query,
-        "generated_answer": generated_answer,
-        "rouge1": rouge['rouge1'].fmeasure,
-        "rouge2": rouge['rouge2'].fmeasure,
-        "rougeL": rouge['rougeL'].fmeasure,
-        "meteor": meteor,
-        "cosine_similarity": cosine_sim,
-        **llm_metrics
-    }
-
-    df = pd.DataFrame([result])
-    if os.path.exists(export_csv_path):
-        df.to_csv(export_csv_path, mode='a', index=False, header=False)
-    else:
-        df.to_csv(export_csv_path, index=False)
-
-    return result
