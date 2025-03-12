@@ -1,5 +1,7 @@
 import os
-os.environ["STREAMLIT_WATCH_DIR"] = "false"  # Fix for PyTorch-related errors
+#os.environ["STREAMLIT_WATCH_DIR"] = "false"  # Fix for PyTorch-related errors
+os.environ["PYTORCH_JIT"] = "0"  # disables PyTorch JIT (which is what triggers this)
+
 
 import streamlit as st
 from openai import OpenAI
