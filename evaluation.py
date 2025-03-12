@@ -1,23 +1,27 @@
 import os
 import pandas as pd
-import numpy as np
 import nltk
 from nltk.translate.meteor_score import meteor_score
 from rouge_score import rouge_scorer
-from bert_score import score as bert_score
+from sklearn.metrics.pairwise import cosine_similarity
+from sentence_transformers import SentenceTransformer
 import openai
 
 nltk.download("wordnet")
 nltk.download("omw-1.4")
+
+embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
 
 # -------- TEXT METRICS -------- #
 def compute_rouge(reference, candidate):
     scorer = rouge_scorer.RougeScorer(['rouge1', 'rouge2', 'rougeL'], use_stemmer=True)
     return scorer.score(reference, candidate)
 
-def compute_bertscore(reference, candidate):
-    P, R, F1 = bert_score([candidate], [reference], lang="en", model_type="bert-large-uncased")
-    return {"bert_precision": P.item(), "bert_recall": R.item(), "bert_f1": F1.item()}
+def compute_cosine_similarity(reference, candidate):
+    ref_emb = embedding_model.encode([reference])
+    cand_emb = embedding_model.encode([candidate])
+    score = cosine_similarity(ref_emb, cand_emb)[0][0]
+    return float(score)
 
 def compute_meteor(reference, candidate):
     return meteor_score([reference], candidate)
@@ -43,22 +47,18 @@ def llm_metric_prompt(metric, question, reviews, answer):
     return call_llm(prompts[metric])
 
 # -------- MAIN EVALUATION FUNCTION -------- #
-def evaluate_answer(user_query, retrieved_reviews, generated_answer, export_csv_path="evaluation_logs.csv"):
-    # Prepare reviews as reference
+def evaluate_answer_cosine(user_query, retrieved_reviews, generated_answer, export_csv_path="evaluation_logs.csv"):
     combined_reviews = " ".join(retrieved_reviews['combined_context'].tolist())
 
-    # Run metrics
     rouge = compute_rouge(combined_reviews, generated_answer)
-    bert = compute_bertscore(combined_reviews, generated_answer)
+    cosine_sim = compute_cosine_similarity(combined_reviews, generated_answer)
     meteor = compute_meteor(combined_reviews, generated_answer)
 
-    # LLM evaluations
     llm_metrics = {
         metric: llm_metric_prompt(metric, user_query, combined_reviews, generated_answer)
         for metric in ["accuracy", "relevance", "coherence", "clarity", "consistency", "sentiment_alignment"]
     }
 
-    # Flatten metrics
     result = {
         "question": user_query,
         "generated_answer": generated_answer,
@@ -66,11 +66,10 @@ def evaluate_answer(user_query, retrieved_reviews, generated_answer, export_csv_
         "rouge2": rouge['rouge2'].fmeasure,
         "rougeL": rouge['rougeL'].fmeasure,
         "meteor": meteor,
-        **bert,
+        "cosine_similarity": cosine_sim,
         **llm_metrics
     }
 
-    # Save to CSV
     df = pd.DataFrame([result])
     if os.path.exists(export_csv_path):
         df.to_csv(export_csv_path, mode='a', index=False, header=False)
@@ -78,3 +77,4 @@ def evaluate_answer(user_query, retrieved_reviews, generated_answer, export_csv_
         df.to_csv(export_csv_path, index=False)
 
     return result
+
