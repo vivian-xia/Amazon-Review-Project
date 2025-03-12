@@ -25,7 +25,9 @@ def compute_cosine_similarity(reference, candidate):
     return float(score)
 
 def compute_meteor(reference, candidate):
-    return meteor_score([reference], candidate)
+    reference_tokens = reference.split()
+    candidate_tokens = candidate.split()
+    return meteor_score([reference_tokens], candidate_tokens)
 
 # -------- LLM EVALUATOR -------- #
 def call_llm(prompt, model="gpt-4o", temperature=0):
