@@ -90,6 +90,7 @@ else:
                 export_csv_path="evaluation_logs.csv"
             )
 
+st.markdown("---")
 # CSV download button
 if os.path.exists("evaluation_logs.csv"):
     df = pd.read_csv("evaluation_logs.csv")
