@@ -6,7 +6,7 @@ from rouge_score import rouge_scorer
 from sklearn.metrics.pairwise import cosine_similarity
 from openai import OpenAI
 
-client = OpenAI()
+client = OpenAI(api_key=api_key))
 nltk.download("wordnet")
 nltk.download("omw-1.4")
 
