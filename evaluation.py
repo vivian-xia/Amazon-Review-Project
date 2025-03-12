@@ -15,8 +15,12 @@ def compute_rouge(reference, candidate):
     return scorer.score(reference, candidate)
 
 def compute_cosine_similarity(reference, candidate):
-    ref_emb = client.embeddings.create(input=[reference], model="text-embedding-ada-002")
-    cand_emb = client.embeddings.create(input=[candidate], model="text-embedding-ada-002")
+    ref_response = client.embeddings.create(input=[reference], model="text-embedding-ada-002")
+    cand_response = client.embeddings.create(input=[candidate], model="text-embedding-ada-002")
+
+    ref_emb = list(ref_response.data[0].embedding)
+    cand_emb = list(cand_response.data[0].embedding)
+
     score = cosine_similarity([ref_emb], [cand_emb])[0][0]
     return float(score)
 
