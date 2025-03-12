@@ -10,7 +10,7 @@ import openai
 nltk.download("wordnet")
 nltk.download("omw-1.4")
 
-embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
+embedding_model = SentenceTransformer("all-MiniLM-L6-v2", device='cpu')
 
 # -------- TEXT METRICS -------- #
 def compute_rouge(reference, candidate):
