@@ -51,7 +51,7 @@ if query_type == "Ask about a specific shampoo":
                     st.write(f"**Sentiment:** {row['sentiment']}")
                     st.write(f"**Review:** {row['combined_context']}")
 
-            evaluate_answer_cosine(
+            evaluate_answer_cosine(api_key=api_key,
                 user_query=user_query,
                 retrieved_reviews=top_reviews_with_sentiment,
                 generated_answer=generated_answer,
@@ -83,7 +83,7 @@ else:
                     st.write(f"**Sentiment:** {row['sentiment']}")
                     st.write(f"**Review:** {row['combined_context']}")
 
-            evaluate_answer_cosine(
+            evaluate_answer_cosine(api_key=api_key,
                 user_query=user_query,
                 retrieved_reviews=top_reviews_with_sentiment,
                 generated_answer=generated_answer,
