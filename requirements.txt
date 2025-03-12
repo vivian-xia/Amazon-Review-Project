@@ -8,4 +8,3 @@ gdown
 rouge-score 
 sentence_transformers
 nltk
-sklearn
