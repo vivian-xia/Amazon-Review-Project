@@ -4,13 +4,10 @@ import nltk
 from nltk.translate.meteor_score import meteor_score
 from rouge_score import rouge_scorer
 from sklearn.metrics.pairwise import cosine_similarity
-from sentence_transformers import SentenceTransformer
 from openai import OpenAI
 
 nltk.download("wordnet")
 nltk.download("omw-1.4")
-
-embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
 
 # -------- TEXT METRICS -------- #
 def compute_rouge(reference, candidate):
@@ -18,9 +15,9 @@ def compute_rouge(reference, candidate):
     return scorer.score(reference, candidate)
 
 def compute_cosine_similarity(reference, candidate):
-    ref_emb = embedding_model.encode([reference])
-    cand_emb = embedding_model.encode([candidate])
-    score = cosine_similarity(ref_emb, cand_emb)[0][0]
+    ref_emb = openai.Embedding.create(input=[reference], model="text-embedding-ada-002")['data'][0]['embedding']
+    cand_emb = openai.Embedding.create(input=[candidate], model="text-embedding-ada-002")['data'][0]['embedding']
+    score = cosine_similarity([ref_emb], [cand_emb])[0][0]
     return float(score)
 
 def compute_meteor(reference, candidate):
