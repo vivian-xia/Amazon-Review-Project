@@ -23,7 +23,7 @@ def compute_meteor(reference, candidate):
     return meteor_score([reference], candidate)
 
 # -------- LLM EVALUATOR -------- #
-def call_llm(prompt, model="gpt-4", temperature=0):
+def call_llm(prompt, model="gpt-4o", temperature=0):
     response = openai.ChatCompletion.create(
         model=model,
         messages=[{"role": "user", "content": prompt}],
