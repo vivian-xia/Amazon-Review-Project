@@ -45,7 +45,7 @@ def llm_metric_prompt(metric, question, reviews, answer):
     return call_llm(prompts[metric])
 
 # -------- MAIN EVALUATION FUNCTION -------- #
-def evaluate_answer_cosine(user_query, retrieved_reviews, generated_answer, export_csv_path="evaluation_logs.csv"):
+def evaluate_answer_cosine(api_key=api_key, user_query, retrieved_reviews, generated_answer, export_csv_path="evaluation_logs.csv"):
     combined_reviews = " ".join(retrieved_reviews['combined_context'].tolist())
 
     rouge = compute_rouge(combined_reviews, generated_answer)
