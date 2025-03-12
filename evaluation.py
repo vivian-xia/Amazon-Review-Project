@@ -36,7 +36,7 @@ def call_llm(prompt, model="gpt-4o", temperature=0):
         messages=[{"role": "user", "content": prompt}],
         temperature=temperature
     )
-    return response['choices'][0]['message']['content']
+    return response.choices[0].message.content.strip()
 
 def llm_metric_prompt(metric, question, reviews, answer):
     prompts = {
