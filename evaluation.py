@@ -6,6 +6,7 @@ from rouge_score import rouge_scorer
 from sklearn.metrics.pairwise import cosine_similarity
 from openai import OpenAI
 
+client = OpenAI()
 nltk.download("wordnet")
 nltk.download("omw-1.4")
 
@@ -24,7 +25,7 @@ def compute_meteor(reference, candidate):
     return meteor_score([reference], candidate)
 
 # -------- LLM EVALUATOR -------- #
-def call_llm(prompt, model="gpt-4", temperature=0):
+def call_llm(prompt, model="gpt-4o", temperature=0):
     response = openai.ChatCompletion.create(
         model=model,
         messages=[{"role": "user", "content": prompt}],
