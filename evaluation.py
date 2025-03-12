@@ -31,7 +31,7 @@ def compute_meteor(reference, candidate):
 
 # -------- LLM EVALUATOR -------- #
 def call_llm(prompt, model="gpt-4o", temperature=0):
-    response = openai.ChatCompletion.create(
+    response = client.chat.completions.create(
         model=model,
         messages=[{"role": "user", "content": prompt}],
         temperature=temperature
