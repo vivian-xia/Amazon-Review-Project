@@ -1,3 +1,6 @@
+import os
+os.environ["STREAMLIT_WATCH_DIR"] = "false"  # Fix for PyTorch-related errors
+
 import streamlit as st
 from openai import OpenAI
 from retriever import ReviewRetriever
@@ -5,8 +8,7 @@ from sentiment import SentimentAgent
 from summary import SummaryAgent
 from evaluation import evaluate_answer
 import io
-import os
-os.environ["STREAMLIT_WATCH_DIR"] = "false"  # Fix for PyTorch-related errors
+import pandas as pd
 
 # Load API key from secrets
 api_key = st.secrets.get("OpenAI_API_Key")
@@ -27,17 +29,14 @@ query_type = st.radio("What would you like to do?",
                     ["Ask about a specific shampoo", "Find the best shampoo for a concern"])
 
 if query_type == "Ask about a specific shampoo":
-    # Get list of shampoos and create dropdown menu
     shampoo_list = retriever.get_product_list()
     selected_shampoo = st.selectbox("Select a shampoo product:", shampoo_list)
-
-    # User input
     user_query = st.text_input(f"Ask a question about '{selected_shampoo}':")
 
     if user_query:
         with st.spinner("Retrieving reviews..."):
             top_reviews = retriever.get_top_k_reviews(user_query, selected_product=selected_shampoo)
-        
+
         if top_reviews.empty:
             st.warning(f"No relevant reviews found for {selected_shampoo}.")
         else:
@@ -47,7 +46,6 @@ if query_type == "Ask about a specific shampoo":
             with st.spinner("Generating AI-powered response..."):
                 generated_answer = summary_agent.generate_summary(user_query, top_reviews_with_sentiment)
 
-            # Display results
             st.subheader("AI-Generated Answer")
             st.write(generated_answer)
 
@@ -57,7 +55,6 @@ if query_type == "Ask about a specific shampoo":
                     st.write(f"**Sentiment:** {row['sentiment']}")
                     st.write(f"**Review:** {row['combined_context']}")
 
-            # ✅ Run evaluation
             evaluate_answer(
                 user_query=user_query,
                 retrieved_reviews=top_reviews_with_sentiment,
@@ -66,7 +63,6 @@ if query_type == "Ask about a specific shampoo":
             )
 
 else:
-    # General concern-based query
     user_query = st.text_input("Example: What shampoo is best for (e.g., volume, dandruff, dry hair)?")
 
     if user_query:
@@ -82,7 +78,6 @@ else:
             with st.spinner("Generating AI-powered response..."):
                 generated_answer = summary_agent.generate_summary(user_query, top_reviews_with_sentiment)
 
-            # Display results
             st.subheader("AI-Generated Answer")
             st.write(generated_answer)
 
@@ -92,7 +87,6 @@ else:
                     st.write(f"**Sentiment:** {row['sentiment']}")
                     st.write(f"**Review:** {row['combined_context']}")
 
-            # ✅ Run evaluation
             evaluate_answer(
                 user_query=user_query,
                 retrieved_reviews=top_reviews_with_sentiment,
@@ -102,10 +96,12 @@ else:
 
 # ✅ Add download button for evaluation logs
 if os.path.exists("evaluation_logs.csv"):
-    with open("evaluation_logs.csv", "rb") as f:
-        st.download_button(
-            label="📥 Download Evaluation Log CSV",
-            data=f,
-            file_name="evaluation_logs.csv",
-            mime="text/csv"
-        )
+    df = pd.read_csv("evaluation_logs.csv")
+    csv_buffer = io.StringIO()
+    df.to_csv(csv_buffer, index=False)
+    st.download_button(
+        label="📥 Download Evaluation Log CSV",
+        data=csv_buffer.getvalue(),
+        file_name="evaluation_logs.csv",
+        mime="text/csv"
+    )
