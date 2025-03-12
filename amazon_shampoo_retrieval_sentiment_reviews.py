@@ -1,4 +1,7 @@
 import os
+os.environ["PYTORCH_JIT"] = st.secrets["PYTORCH_JIT"]
+os.environ["STREAMLIT_WATCH_USE_POLLING"] = st.secrets["STREAMLIT_WATCH_USE_POLLING"]
+
 import streamlit as st
 from openai import OpenAI
 from retriever import ReviewRetriever
