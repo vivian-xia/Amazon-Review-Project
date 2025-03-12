@@ -6,7 +6,6 @@ from rouge_score import rouge_scorer
 from sklearn.metrics.pairwise import cosine_similarity
 from openai import OpenAI
 
-client = OpenAI(api_key=api_key)
 nltk.download("wordnet")
 nltk.download("omw-1.4")
 
@@ -46,6 +45,8 @@ def llm_metric_prompt(metric, question, reviews, answer):
 
 # -------- MAIN EVALUATION FUNCTION -------- #
 def evaluate_answer_cosine(api_key=api_key, user_query, retrieved_reviews, generated_answer, export_csv_path="evaluation_logs.csv"):
+    global client
+    client = OpenAI(api_key=api_key)
     combined_reviews = " ".join(retrieved_reviews['combined_context'].tolist())
 
     rouge = compute_rouge(combined_reviews, generated_answer)
