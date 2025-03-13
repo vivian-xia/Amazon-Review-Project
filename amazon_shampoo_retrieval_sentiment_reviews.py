@@ -1,12 +1,13 @@
 import os
 import streamlit as st
-import io
 import pandas as pd
 from openai import OpenAI
 from retriever import ReviewRetriever
 from sentiment import SentimentAgent
 from summary import SummaryAgent
 from evaluation import evaluate_answer_cosine
+from google.oauth2 import service_account
+from googleapiclient.discovery import build
 
 # Load API key from secrets
 api_key = st.secrets.get("OpenAI_API_Key")
@@ -51,7 +52,8 @@ if query_type == "Ask about a specific shampoo":
                     st.write(f"**Sentiment:** {row['sentiment']}")
                     st.write(f"**Review:** {row['combined_context']}")
 
-            evaluate_answer_cosine(api_key=api_key,
+            evaluate_answer_cosine(
+                api_key=api_key,
                 user_query=user_query,
                 retrieved_reviews=top_reviews_with_sentiment,
                 generated_answer=generated_answer,
@@ -83,22 +85,44 @@ else:
                     st.write(f"**Sentiment:** {row['sentiment']}")
                     st.write(f"**Review:** {row['combined_context']}")
 
-            evaluate_answer_cosine(api_key=api_key,
+            evaluate_answer_cosine(
+                api_key=api_key,
                 user_query=user_query,
                 retrieved_reviews=top_reviews_with_sentiment,
                 generated_answer=generated_answer,
                 export_csv_path="evaluation_logs.csv"
             )
 
-st.markdown("---")
-# CSV download button
+# Upload evaluation logs to Google Sheet
+def append_to_google_sheet(sheet_id, sheet_range, data):
+    creds = service_account.Credentials.from_service_account_file("gdrive_credentials.json")
+    service = build("sheets", "v4", credentials=creds)
+    sheet = service.spreadsheets()
+
+    body = {
+        "values": data
+    }
+
+    result = sheet.values().append(
+        spreadsheetId=sheet_id,
+        range=sheet_range,
+        valueInputOption="RAW",
+        insertDataOption="INSERT_ROWS",
+        body=body
+    ).execute()
+
+    return result
+
 if os.path.exists("evaluation_logs.csv"):
-    df = pd.read_csv("evaluation_logs.csv")
-    csv_buffer = io.StringIO()
-    df.to_csv(csv_buffer, index=False)
-    st.download_button(
-        label="📥 Download Evaluation Log CSV",
-        data=csv_buffer.getvalue(),
-        file_name="evaluation_logs.csv",
-        mime="text/csv"
-    )
+    try:
+        df = pd.read_csv("evaluation_logs.csv")
+        values = [df.columns.tolist()] + df.values.tolist()
+
+        SHEET_ID = "1YIK6FL1mrSKwnrKK4V1SdipdBJHK-DUh_UvilK9HONo"
+        SHEET_RANGE = "Sheet1!A2"  # Adjust as needed
+
+        append_to_google_sheet(SHEET_ID, SHEET_RANGE, values)
+        st.success("✅ Evaluation results uploaded to Google Sheet!")
+        st.markdown(f"[🔗 Open Sheet](https://docs.google.com/spreadsheets/d/{SHEET_ID})")
+    except Exception as e:
+        st.error(f"❌ Failed to write to Google Sheet: {e}")
