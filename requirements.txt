@@ -7,4 +7,4 @@ python-dotenv
 gdown
 rouge-score 
 nltk
-google.oauth2
+google-auth
