@@ -6,6 +6,5 @@ openai
 python-dotenv
 gdown
 rouge-score 
-sentence_transformers
 nltk
 google.oauth2
