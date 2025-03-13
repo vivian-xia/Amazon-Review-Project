@@ -95,7 +95,7 @@ else:
 
 # Upload evaluation logs to Google Sheet
 def append_to_google_sheet(sheet_id, sheet_range, data):
-    creds = service_account.Credentials.from_service_account_file("gdrive_credentials.json")
+    creds = service_account.Credentials.from_service_account_info(st.secrets["google_sheets"])
     service = build("sheets", "v4", credentials=creds)
     sheet = service.spreadsheets()
 
