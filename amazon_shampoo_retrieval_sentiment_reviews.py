@@ -119,7 +119,7 @@ if os.path.exists("evaluation_logs.csv"):
         values = [df.columns.tolist()] + df.values.tolist()
 
         SHEET_ID = "1YIK6FL1mrSKwnrKK4V1SdipdBJHK-DUh_UvilK9HONo"
-        SHEET_RANGE = "Sheet1!A2"  # Adjust as needed
+        SHEET_RANGE = "Sheet1!A1"  # Adjust as needed
 
         append_to_google_sheet(SHEET_ID, SHEET_RANGE, values)
         st.success("✅ Evaluation results uploaded to Google Sheet!")
