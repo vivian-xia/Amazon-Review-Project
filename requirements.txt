@@ -8,3 +8,4 @@ gdown
 rouge-score 
 sentence_transformers
 nltk
+google.oauth2
