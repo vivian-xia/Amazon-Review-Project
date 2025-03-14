@@ -112,12 +112,6 @@ if run_button:
                 st.markdown(f"**Modified Answer** (Changed {param_to_change} to {new_value})")
                 st.write(mod_answer)
 
-            # Download results
-            csv_buffer = io.StringIO()
-            results_df.to_csv(csv_buffer, index=False)
-            st.download_button("📥 Download CSV Results", data=csv_buffer.getvalue(), file_name="param_comparison.csv", mime="text/csv")
-
-
 def overwrite_google_sheet(sheet_id, sheet_range, data):
     creds = service_account.Credentials.from_service_account_info(st.secrets["google_sheets"])
     service = build("sheets", "v4", credentials=creds)
