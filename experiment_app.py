@@ -118,22 +118,16 @@ if run_button:
             st.download_button("📥 Download CSV Results", data=csv_buffer.getvalue(), file_name="param_comparison.csv", mime="text/csv")
 
 
-import json
-from google.oauth2 import service_account
-from googleapiclient.discovery import build
-
-
 def overwrite_google_sheet(sheet_id, sheet_range, data):
-    SERVICE_ACCOUNT_FILE = "eighth-density-347504-9dd7cfcaf056.json"  # Path to your JSON key
-    with open(SERVICE_ACCOUNT_FILE, "r") as f:
-        service_account_info = json.load(f)
-
-    creds = service_account.Credentials.from_service_account_info(service_account_info)
+    creds = service_account.Credentials.from_service_account_info(st.secrets["google_sheets"])
     service = build("sheets", "v4", credentials=creds)
     sheet = service.spreadsheets()
 
-    body = {"values": data}
+    body = {
+        "values": data
+    }
 
+    # Use update instead of append to fully overwrite the range
     result = sheet.values().update(
         spreadsheetId=sheet_id,
         range=sheet_range,
