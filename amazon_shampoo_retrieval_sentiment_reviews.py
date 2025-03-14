@@ -93,8 +93,7 @@ else:
                 export_csv_path="evaluation_logs.csv"
             )
 
-# Upload evaluation logs to Google Sheet
-def append_to_google_sheet(sheet_id, sheet_range, data):
+def overwrite_google_sheet(sheet_id, sheet_range, data):
     creds = service_account.Credentials.from_service_account_info(st.secrets["google_sheets"])
     service = build("sheets", "v4", credentials=creds)
     sheet = service.spreadsheets()
@@ -103,15 +102,16 @@ def append_to_google_sheet(sheet_id, sheet_range, data):
         "values": data
     }
 
-    result = sheet.values().append(
+    # Use update instead of append to fully overwrite the range
+    result = sheet.values().update(
         spreadsheetId=sheet_id,
         range=sheet_range,
         valueInputOption="RAW",
-        insertDataOption="INSERT_ROWS",
         body=body
     ).execute()
 
     return result
+
 
 if os.path.exists("evaluation_logs.csv"):
     try:
@@ -119,10 +119,10 @@ if os.path.exists("evaluation_logs.csv"):
         values = [df.columns.tolist()] + df.values.tolist()
 
         SHEET_ID = "1YIK6FL1mrSKwnrKK4V1SdipdBJHK-DUh_UvilK9HONo"
-        SHEET_RANGE = "Sheet1!A1"  # Adjust as needed
+        SHEET_RANGE = "Sheet1!A1"  # Overwrite from top
 
-        append_to_google_sheet(SHEET_ID, SHEET_RANGE, values)
-        st.success("✅ Evaluation results uploaded to Google Sheet!")
+        overwrite_google_sheet(SHEET_ID, SHEET_RANGE, values)
+        st.success("✅ Evaluation results uploaded (overwritten) to Google Sheet!")
         st.markdown(f"[🔗 Open Sheet](https://docs.google.com/spreadsheets/d/{SHEET_ID})")
     except Exception as e:
         st.error(f"❌ Failed to write to Google Sheet: {e}")
