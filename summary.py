@@ -28,14 +28,14 @@ class SummaryAgent:
         Don't make up any information or provide personal opinions.
         
         If the question is unanswerable based on the reviews, communicate that clearly and the response should be in one sentence. 
-        If the question is answerable based on the reviews, provide the response in a well-structured paragraph format in ideally 500 tokens.
+        If the question is answerable based on the reviews, provide the response in a well-structured paragraph format in ideally 200 tokens.
         """
 
         response = self.client.chat.completions.create(
             model="gpt-4o",
             messages=[{"role": "system", "content": "You are an expert product review analyst."},
                       {"role": "user", "content": prompt}],
-            temperature=0.3, max_tokens=500, top_p = 1.0, frequency_penalty=0, presence_penalty=0
+            temperature=0.3, max_tokens=200, top_p = 1.0, frequency_penalty=0, presence_penalty=0
         )
 
         return response.choices[0].message.content.strip()
