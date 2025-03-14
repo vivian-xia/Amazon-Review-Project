@@ -11,7 +11,7 @@ class SummaryAgent:
         """Initialize OpenAI client."""
         self.client = OpenAI(api_key=api_key)
 
-    def generate_summary(self, user_query, reviews_with_sentiment):
+    def generate_summary(self, user_query, reviews_with_sentiment, **generation_params):
         """Generate a final AI-powered answer based on reviews and their sentiment."""
         review_texts = "\n".join(
             [f"- {row['combined_context']} (Sentiment: {row['sentiment']})" for _, row in reviews_with_sentiment.iterrows()]
@@ -31,11 +31,19 @@ class SummaryAgent:
         If the question is answerable based on the reviews, provide the response in a well-structured paragraph format in ideally 200 tokens.
         """
 
-        response = self.client.chat.completions.create(
-            model="gpt-4o",
-            messages=[{"role": "system", "content": "You are an expert product review analyst."},
-                      {"role": "user", "content": prompt}],
-            temperature=0.3, max_tokens=200, top_p = 1.0, frequency_penalty=0, presence_penalty=0
-        )
+        gen_args = {
+            "model": "gpt-4o",
+            "messages": [
+                {"role": "system", "content": "You are an expert product review analyst."},
+                {"role": "user", "content": prompt}
+            ],
+            "temperature": generation_params.get("temperature", 0.3),
+            "max_tokens": generation_params.get("max_tokens", 200),
+            "top_p": generation_params.get("top_p", 1.0),
+            "frequency_penalty": generation_params.get("frequency_penalty", 0),
+            "presence_penalty": generation_params.get("presence_penalty", 0)
+        }
+
+        response = self.client.chat.completions.create(**gen_args)
 
         return response.choices[0].message.content.strip()
