@@ -7,4 +7,4 @@ From this dataset, the beauty products, specifically shampoo products were explo
 
 The result is an interactive chatbot that outputs the response to the question on products reviewed including which products are recommended for certain concerns or questions on the specific products themselves.
 
-The app can be viewed at the following link: [Amazon Shampoo Review Chatbot](https://vivian-xia-am-amazon-shampoo-retrieval-sentiment-reviews-gsv0rz.streamlit.app/).
+The app can be viewed at the following link: [Amazon Shampoo Review Chatbot](https://vivian-xia-am-amazon-shampoo-retrieval-sentiment-reviews-gsv0rz.streamlit.app/), corresponding to amazon_shampoo_retrieval_sentiment_reviews.py.
