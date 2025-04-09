@@ -12,7 +12,7 @@ from googleapiclient.discovery import build
 # Load API key from secrets
 api_key = st.secrets.get("OpenAI_API_Key")
 if not api_key:
-    st.error("❌ OpenAI API key not found in secrets.")
+    st.error("OpenAI API key not found in secrets.")
     st.stop()
 
 # Initialize agents
@@ -102,7 +102,6 @@ def overwrite_google_sheet(sheet_id, sheet_range, data):
         "values": data
     }
 
-    # Use update instead of append to fully overwrite the range
     result = sheet.values().update(
         spreadsheetId=sheet_id,
         range=sheet_range,
@@ -122,7 +121,7 @@ if os.path.exists("evaluation_logs.csv"):
         SHEET_RANGE = "Sheet1!A1"  # Overwrite from top
 
         overwrite_google_sheet(SHEET_ID, SHEET_RANGE, values)
-        st.success("✅ Evaluation results uploaded (overwritten) to Google Sheet!")
+        st.success("✅ Evaluation results uploaded to Google Sheet!")
         st.markdown(f"[🔗 Open Sheet](https://docs.google.com/spreadsheets/d/{SHEET_ID})")
     except Exception as e:
         st.error(f"❌ Failed to write to Google Sheet: {e}")
