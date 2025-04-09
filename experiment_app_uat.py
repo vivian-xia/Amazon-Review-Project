@@ -14,13 +14,11 @@ from googleapiclient.discovery import build
 
 # Setup
 st.set_page_config(page_title="LLM Param Comparison", layout="wide")
-st.title("Compare LLM Parameters to Baseline")
+st.title("🔍 Compare LLM Parameters to Baseline")
 
-# Load API key from secrets
-api_key = st.secrets.get("OpenAI_API_Key")
-if not api_key:
-    st.error("OpenAI API key not found in secrets.")
-    st.stop()
+# Load API key
+load_dotenv()
+api_key = os.getenv("OpenAI_API_Key")
 
 # Initialize agents
 retriever = ReviewRetriever(api_key=api_key)
@@ -56,7 +54,7 @@ baseline_params = {
 if run_button:
     st.subheader("Comparison Results")
     with st.spinner("Running evaluation for baseline and modified settings..."):
-        top_reviews = retriever.get_top_views(query, selected_product)
+        top_reviews = retriever.get_top_k_reviews(query, selected_product)
 
         if top_reviews.empty:
             st.warning("No relevant reviews found.")
@@ -112,16 +110,28 @@ if run_button:
                 st.markdown(f"**Modified Answer** (Changed {param_to_change} to {new_value})")
                 st.write(mod_answer)
 
+            # Download results
+            csv_buffer = io.StringIO()
+            results_df.to_csv(csv_buffer, index=False)
+            st.download_button("Download CSV Results", data=csv_buffer.getvalue(), file_name="param_comparison.csv", mime="text/csv")
+
+
+import json
+from google.oauth2 import service_account
+from googleapiclient.discovery import build
+
+
 def overwrite_google_sheet(sheet_id, sheet_range, data):
-    creds = service_account.Credentials.from_service_account_info(st.secrets["google_sheets"])
+    SERVICE_ACCOUNT_FILE = "eighth-density-347504-9dd7cfcaf056.json"  # Path to your JSON key
+    with open(SERVICE_ACCOUNT_FILE, "r") as f:
+        service_account_info = json.load(f)
+
+    creds = service_account.Credentials.from_service_account_info(service_account_info)
     service = build("sheets", "v4", credentials=creds)
     sheet = service.spreadsheets()
 
-    body = {
-        "values": data
-    }
+    body = {"values": data}
 
-    # Use update instead of append to fully overwrite the range
     result = sheet.values().update(
         spreadsheetId=sheet_id,
         range=sheet_range,

@@ -26,7 +26,7 @@ class SentimentAgent:
 
         Return the output in a valid JSON format, with one label per review in the same order:
         {{
-          "sentiments": ["positive", "negative", "neutral", ...]
+          "sentiments": ["positive", "negative", "neutral"]
         }}
         DO NOT include any explanations, markdown, or extra text—only the JSON object.
         """

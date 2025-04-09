@@ -9,7 +9,7 @@ from openai import OpenAI
 nltk.download("wordnet")
 nltk.download("omw-1.4")
 
-# -------- TEXT METRICS -------- #
+# TEXT METRICS
 def compute_rouge(reference, candidate):
     scorer = rouge_scorer.RougeScorer(['rouge1', 'rouge2', 'rougeL'], use_stemmer=True)
     return scorer.score(reference, candidate)
@@ -29,7 +29,7 @@ def compute_meteor(reference, candidate):
     candidate_tokens = candidate.split()
     return meteor_score([reference_tokens], candidate_tokens)
 
-# -------- LLM EVALUATOR -------- #
+# LLM EVALUATOR
 def call_llm(prompt, model="gpt-4o", temperature=0):
     response = client.chat.completions.create(
         model=model,
@@ -49,7 +49,7 @@ def llm_metric_prompt(metric, question, reviews, answer):
     }
     return call_llm(prompts[metric])
 
-# -------- MAIN EVALUATION FUNCTION -------- #
+# MAIN EVALUATION FUNCTION
 def evaluate_answer_cosine(api_key, user_query, retrieved_reviews, generated_answer, export_csv_path="evaluation_logs.csv"):
     global client
     client = OpenAI(api_key=api_key)
